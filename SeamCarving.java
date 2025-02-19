@@ -17,34 +17,34 @@ public class SeamCarving {
 
    
    public static String SelectedImage (){
-  Scanner input = new Scanner(System.in);
-  System.out.print("Enter the ID of the Image you want to resize it:\n1-Cartoon\n2-Carving\n3-Center\n4-Dancers\n5-Fenster\n6-Grave\n7-Museum\n8-Square\n9-Tower\n---------------------\n the ID: ");
-  int idOfSelectedImage = input.nextInt();
-  String name=null;
-  switch (idOfSelectedImage) {
-    case 1: name="cartoon";
-    break;
-    case 2: name= "carving";
-    break;
-    case 3: name= "center";
-    break;
-    case 4: name= "dancer";
-    break;
-    case 5: name= "fenster";
-    break;
-    case 6: name= "grave";
-    break;
-    case 7: name= "museum";
-    break;
-    case 8: name= "square";
-    break;
-    case 9: name= "tower";
-    break;
-    default: System.out.println("invalid input :(");
-  }
+    Scanner input = new Scanner(System.in);
+    System.out.print("Enter the ID of the Image you want to resize it:\n1-Cartoon\n2-Carving\n3-Center\n4-Dancers\n5-Fenster\n6-Grave\n7-Museum\n8-Square\n9-Tower\n---------------------\n the ID: ");
+    int idOfSelectedImage = input.nextInt();
+    String name=null;
+    switch (idOfSelectedImage) {
+     case 1: name="cartoon";
+     break;
+     case 2: name= "carving";
+     break;
+     case 3: name= "center";
+     break;
+     case 4: name= "dancer";
+     break;
+     case 5: name= "fenster";
+     break;
+     case 6: name= "grave";
+     break;
+     case 7: name= "museum";
+     break;
+     case 8: name= "square";
+     break;
+     case 9: name= "tower";
+     break;
+     default: System.out.println("invalid input :(");
+    }
 
-  input.close();
-  return name;
+   input.close();
+   return name;
 
 }
 
@@ -149,11 +149,10 @@ public class SeamCarving {
 }
 
 
-   public static void findMinSeam(int[][] pixelsEnergy, int sumOfEnergies, int column, int row, LinkedList<Integer> path){
+    public static void findMinSeam(int[][] pixelsEnergy, int sumOfEnergies, int column, int row, LinkedList<Integer> path){
         if(column<0 || column>=pixelsEnergy[0].length) return;
-        
         path.add(column);
-        sumOfEnergies=+pixelsEnergy[row][column];
+        sumOfEnergies+=pixelsEnergy[row][column];
         if(row==0){
             if(sumOfEnergies<min){
              min=sumOfEnergies;
@@ -161,10 +160,26 @@ public class SeamCarving {
             }
             return;
         }
-        findMinSeam(pixelsEnergy,sumOfEnergies+pixelsEnergy[row][column],column,row-1,new LinkedList<>(path)) ;  
-        findMinSeam(pixelsEnergy,sumOfEnergies+pixelsEnergy[row][column],column+1,row-1,new LinkedList<>(path)) ;      
-        findMinSeam(pixelsEnergy,sumOfEnergies+pixelsEnergy[row][column],column-1,row-1,new LinkedList<>(path)) ;      
+        findMinSeam(pixelsEnergy,sumOfEnergies,column,row-1,new LinkedList<>(path)) ;  
+        //findMinSeam(pixelsEnergy,sumOfEnergies,column+1,row-1,new LinkedList<>(path)) ;      
+        //findMinSeam(pixelsEnergy,sumOfEnergies,column-1,row-1,new LinkedList<>(path)) ;      
     
     }  
 
+
+ public static BufferedImage removeSeam(BufferedImage image){
+     
+    BufferedImage newImage = new BufferedImage(image.getWidth() - 1, image.getHeight(), BufferedImage.TYPE_INT_RGB); // create new image to store the resized image
+    for (int y = image.getHeight()-1; y>=0 ; y--) {
+        int xNewImage = 0;
+        for (int x = 0; x < image.getWidth(); x++) {
+            if (x == pathOfMinSeam.getFirst())  continue;         // skip the minimum vertical seam energy
+            newImage.setRGB(xNewImage, y, image.getRGB(x, y));   // pixels copying
+            xNewImage++;
+        }
+        pathOfMinSeam.removeFirst();
+    }
+
+    return newImage;
+  }
 }
