@@ -1,13 +1,14 @@
 import java.awt.Color;
+import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.Scanner;
 
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 
 public class SeamCarving {
@@ -18,7 +19,7 @@ public class SeamCarving {
    
    public static String SelectedImage (){
     Scanner input = new Scanner(System.in);
-    System.out.print("Enter the ID of the Image you want to resize it:\n1-Cartoon\n2-Carving\n3-Center\n4-Dancers\n5-Fenster\n6-Grave\n7-Museum\n8-Square\n9-Tower\n---------------------\n the ID: ");
+    System.out.print("Enter the ID of the Image you want to resize it:\n1-Cartoon\n2-Carving\n3-Center\n4-Dancers\n5-Fenster\n6-Grave\n7-Museum\n8-Square\n9-Tower\n10-Casal\n---------------------\n the ID: ");
     int idOfSelectedImage = input.nextInt();
     String name=null;
     switch (idOfSelectedImage) {
@@ -28,7 +29,7 @@ public class SeamCarving {
      break;
      case 3: name= "center";
      break;
-     case 4: name= "dancer";
+     case 4: name= "dancers";
      break;
      case 5: name= "fenster";
      break;
@@ -39,6 +40,8 @@ public class SeamCarving {
      case 8: name= "square";
      break;
      case 9: name= "tower";
+     break;
+     case 10: name="casal";
      break;
      default: System.out.println("invalid input :(");
     }
@@ -52,22 +55,28 @@ public class SeamCarving {
    public static void display(String name){
     JFrame frame = new JFrame();
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setBounds(200,30,1000,900);
+    frame.setBounds(170,30,1000,600);
 
     ImageIcon imageBefor = new ImageIcon("images\\"+name+".jpg");
-    ImageIcon imageAfter = new ImageIcon("resizedImage.jpg");
+    ImageIcon imageAfter = new ImageIcon("resized Image.jpg");
 
     JLabel label1 = new JLabel(imageBefor);
     JLabel label2 = new JLabel(imageAfter);
 
-    JPanel panel = new JPanel();
-    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+   JLabel text1 = new JLabel("Original Image", SwingConstants.CENTER);
+        JLabel text2 = new JLabel("Resized Image", SwingConstants.CENTER);
 
-    panel.add(label1);
-    panel.add(label2);
+        // Main panel with GridLayout (2 rows, 2 columns)
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new GridLayout(2, 2, 3, 10)); // 2 rows, 2 columns, with gaps
 
-    frame.add(panel);
+        // Add components to the grid
+        mainPanel.add(label1);
+        mainPanel.add(label2);
+        mainPanel.add(text1);
+        mainPanel.add(text2);
 
+        frame.add(mainPanel);
     frame.setVisible(true);
 
 } 
