@@ -1,23 +1,23 @@
-import java.awt.Color;
-import java.awt.GridLayout;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.LinkedList;
 import java.util.Scanner;
+import javax.swing.*;
 
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
+/* This impelmentation for seam carving algorithm using bute force approach
+ * there are three main methods:
+ *  1-calculatepixelsEnergy() to calculate the energy of each pixel in the image and return a HxW  matrix storing the energies of pixles.
+ *  2-findMinSeam() which is the core of seam carving, this method search for a verticl column having the minimum sum of energies 
+ *  3-removeSeam() it remove the seam by copying the RBG of each pixel in the original image into the resized one skiping the unwanted column 
+ */
 
 public class SeamCarving {
 
-   static int min=Integer.MAX_VALUE;
-   static LinkedList<Integer> pathOfMinSeam ;
+   static int min=Integer.MAX_VALUE;   // stores the minimum sum of energies
+   static int minSeamColumn;          // to store the number of column having minimum sum of energies
 
    
-   public static String SelectedImage (){
+   public static String SelectedImage (){   // a method to make a user chooose the image they want to resize
     Scanner input = new Scanner(System.in);
     System.out.print("Enter the ID of the Image you want to resize it:\n1-Cartoon\n2-Carving\n3-Center\n4-Dancers\n5-Fenster\n6-Grave\n7-Museum\n8-Square\n9-Tower\n10-Casal\n---------------------\n the ID: ");
     int idOfSelectedImage = input.nextInt();
@@ -43,32 +43,35 @@ public class SeamCarving {
      break;
      case 10: name="casal";
      break;
-     default: System.out.println("invalid input :(");
+     default: System.out.println("invalid input :("); System.exit(0);
     }
 
    input.close();
    return name;
 
-}
+ }
 
 
-   public static void display(String name){
-    JFrame frame = new JFrame();
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setBounds(170,30,1000,600);
+   public static void display(String name){ // GUI to display the result showing the diffrence between the original image and the resized one
+        JFrame frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setBounds(170,30,1000,600);
 
-    ImageIcon imageBefor = new ImageIcon("images\\"+name+".jpg");
-    ImageIcon imageAfter = new ImageIcon("resized Image.jpg");
+        ImageIcon imageBefor = new ImageIcon("images\\"+name+".jpg");
+        ImageIcon imageAfter = new ImageIcon("resized Image.jpg");
 
-    JLabel label1 = new JLabel(imageBefor);
-    JLabel label2 = new JLabel(imageAfter);
-
-   JLabel text1 = new JLabel("Original Image", SwingConstants.CENTER);
+        JLabel label1 = new JLabel(imageBefor);
+        JLabel label2 = new JLabel(imageAfter);
+          
+        JLabel text1 = new JLabel("Original Image", SwingConstants.CENTER);
         JLabel text2 = new JLabel("Resized Image", SwingConstants.CENTER);
 
         // Main panel with GridLayout (2 rows, 2 columns)
         JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayout(2, 2, 3, 10)); // 2 rows, 2 columns, with gaps
+        mainPanel.setLayout(new GridLayout(2, 2, 3,1)); // 2 rows, 2 columns, with gaps
+
+        JScrollPane scroll1 = new JScrollPane(mainPanel);
+       
 
         // Add components to the grid
         mainPanel.add(label1);
@@ -76,23 +79,22 @@ public class SeamCarving {
         mainPanel.add(text1);
         mainPanel.add(text2);
 
-        frame.add(mainPanel);
-    frame.setVisible(true);
+        frame.add(scroll1);
+        frame.setVisible(true);
 
-} 
+    } 
 
 
    public static int[][] calculatepixelsEnergy(BufferedImage image){
 
     int x2=0,y2=0,counter;
-    int pixelsEnergy[][] = new int[image.getHeight()][image.getWidth()];
+    int pixelsEnergy[][] = new int[image.getHeight()][image.getWidth()];    // a matrix of size MxN  where M in the width of the image and N is the height of it. to store pixels energies
 
     for (int x = 0; x < image.getWidth(); x++) {
         for (int y = 0; y < image.getHeight(); y++) {
 
-            double[] brightnesses = new double[8];    // array to store the brightnesses of neighboring pixels
-
-            for (counter = 0; counter < 8; counter++) {
+            double[] brightnesses = new double[8];       // array to store the brightnesses of neighboring pixels, to use it later in finding the energy of the pixel
+            for (counter = 0; counter < 8; counter++) { // in each iteration we are going to calculate the brightness for one neighboring pixel
                 boolean notEdge = false;
 
                 // Define neighboring pixels
@@ -158,20 +160,17 @@ public class SeamCarving {
 }
 
 
-    public static void findMinSeam(int[][] pixelsEnergy, int sumOfEnergies, int column, int row, LinkedList<Integer> path){
-        if(column<0 || column>=pixelsEnergy[0].length) return;
-        path.add(column);
-        sumOfEnergies+=pixelsEnergy[row][column];
-        if(row==0){
+    public static void findMinSeam(int[][] pixelsEnergy, int sumOfEnergies, int column, int row){
+        if(column<0 || column>=pixelsEnergy[0].length) return;     // to ensure we are not out of the matrix bounds
+        sumOfEnergies+=pixelsEnergy[row][column];                 // add the energy of current pixel to the sum of energies of this column to compare later the sum of energeies between columns
+        if(row==0){                                              // reached the top of matrix 
             if(sumOfEnergies<min){
-             min=sumOfEnergies;
-             pathOfMinSeam=new LinkedList<>(path);
+             min=sumOfEnergies;                                // the process of choosing the minimum energy seam column and store the column number in global variable "minSeamColumn" 
+             minSeamColumn=column;
             }
             return;
         }
-        findMinSeam(pixelsEnergy,sumOfEnergies,column,row-1,new LinkedList<>(path)) ;  
-        //findMinSeam(pixelsEnergy,sumOfEnergies,column+1,row-1,new LinkedList<>(path)) ;      
-        //findMinSeam(pixelsEnergy,sumOfEnergies,column-1,row-1,new LinkedList<>(path)) ;      
+        findMinSeam(pixelsEnergy,sumOfEnergies,column,row-1) ;  // one recursive call exploring the stright path without going left or right  *column*
     
     }  
 
@@ -182,13 +181,13 @@ public class SeamCarving {
     for (int y = image.getHeight()-1; y>=0 ; y--) {
         int xNewImage = 0;
         for (int x = 0; x < image.getWidth(); x++) {
-            if (x == pathOfMinSeam.getFirst())  continue;         // skip the minimum vertical seam energy
+            if (x == minSeamColumn)  continue;         // skip the minimum vertical seam energy
             newImage.setRGB(xNewImage, y, image.getRGB(x, y));   // pixels copying
             xNewImage++;
         }
-        pathOfMinSeam.removeFirst();
     }
 
     return newImage;
   }
 }
+
