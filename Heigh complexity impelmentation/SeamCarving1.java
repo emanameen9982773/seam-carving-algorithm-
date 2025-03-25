@@ -18,7 +18,7 @@ public class SeamCarving1 {
    
    public static String SelectedImage (){        // a method to make a user chooose the image they want to resize
     Scanner input = new Scanner(System.in);
-    System.out.print("Enter the ID of the Image you want to resize it:\n1-Cartoon\n2-Carving\n3-Center\n4-Dancers\n5-Fenster\n6-Grave\n7-Museum\n8-Square\n9-Tower\n10-Casal\n---------------------\n the ID: ");
+    System.out.print("Enter the ID of the Image you want to resize it:\n1-Cartoon\n2-Carving\n3-Center\n4-Dancers\n5-Fenster\n6-Grave\n7-Museum\n8-Square\n9-Tower\n10-Casal\n11-water\n---------------------\n the ID: ");
     int idOfSelectedImage = input.nextInt();
     String name=null;
     switch (idOfSelectedImage) {
@@ -41,6 +41,8 @@ public class SeamCarving1 {
      case 9: name= "tower";
      break;
      case 10: name="casal";
+     break;
+     case 11: name="water";
      break;
      default: System.out.println("invalid input :("); System.exit(0);
     }
