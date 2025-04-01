@@ -1,5 +1,8 @@
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.LinkedList;
+
+import javax.imageio.ImageIO;
 
 public class DynamicProgramming {
 
@@ -7,6 +10,15 @@ public class DynamicProgramming {
     static private int[][] dp;
     static private LinkedList<Integer> minPath;
 
+
+    public static void main (String []args)throws Exception{
+        BufferedImage newImage ;
+        String name= SeamCarving2.SelectedImage();
+        BufferedImage image= ImageIO.read(new File("images\\"+name+".jpg"));
+        newImage= resizeImage(image,95);        
+        ImageIO.write(newImage, "jpg", new File("resized Image.jpg"));
+        SeamCarving2.display(name);
+    }
 
     private static void calculate_dp(BufferedImage image) {
 
@@ -39,16 +51,14 @@ public class DynamicProgramming {
 
         }
 
-
     }
 
-
     private static void findMinSeamPath() {
-        minPath = new LinkedList<>();  // Initialize minPath for each seam path calculation
-        
+        minPath = new LinkedList<>(); // Initialize minPath for each seam path calculation
+
         int min = dp[0][0];
         int minCol = 0;
-    
+
         // Find the column with the minimal energy in the first row
         for (int i = 1; i < dp[0].length; i++) {
             if (dp[0][i] < min) {
@@ -56,14 +66,14 @@ public class DynamicProgramming {
                 min = dp[0][i];
             }
         }
-    
-        minPath.add(minCol);  // Add the starting column to the path
+
+        minPath.add(minCol); // Add the starting column to the path
         for (int row = 1; row < dp.length; row++) {
             int mid = dp[row][minCol];
-        
+
             int left = (minCol > 0) ? dp[row][minCol - 1] : Integer.MAX_VALUE;
             int right = (minCol < dp[0].length - 1) ? dp[row][minCol + 1] : Integer.MAX_VALUE;
-        
+
             if (left < mid && left <= right) {
                 min = left;
                 minCol--;
@@ -73,35 +83,31 @@ public class DynamicProgramming {
             } else {
                 min = mid;
             }
-        
-            minPath.add(minCol);  // Add the current column to the path
+
+            minPath.add(minCol); // Add the current column to the path
         }
-    
-        // Ensure minPath has been populated
+      // Ensure minPath has been populated
         if (minPath.isEmpty()) {
             System.out.println("Error: minPath is empty.");
         }
     }
-    
-    
-    
 
-    public static BufferedImage resizeImage(BufferedImage image, int numOfSeam){
+    public static BufferedImage resizeImage(BufferedImage image, int numOfSeam) {
 
         for (int i = 0; i < numOfSeam; i++) {
             calculate_dp(image);
             findMinSeamPath();
-            
+
             // Ensure minPath is populated
             if (minPath.isEmpty()) {
                 System.out.println("Error: minPath is empty before removing the seam.");
                 break; // Exit if minPath is empty
             }
-    
+
             image = SeamCarving2.removeSeam(image, minPath);
         }
-    
+
         return image;
     }
-    
+
 }
