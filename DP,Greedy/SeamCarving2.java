@@ -98,30 +98,28 @@ public class SeamCarving2 {
         return pixelsEnergy;
     }
 
-   public static BufferedImage removeSeam(BufferedImage image, LinkedList<Integer> pathOfMinSeam) {
-    if (pathOfMinSeam.isEmpty()) {
-        System.out.println("Error: minPath is empty. No seam to remove.");
-        return image; // Return the original image if there's no seam
-    }
+    public static BufferedImage removeSeam(BufferedImage image, int[] seam) {
+        int width = image.getWidth();
+        int height = image.getHeight();
 
-    BufferedImage newImage = new BufferedImage(image.getWidth() - 1, image.getHeight(), BufferedImage.TYPE_INT_RGB); // create new image to store the resized image
-    int h =pathOfMinSeam.size();
-    for (int row = 0; row < h; row++) {
-        int colNewImage = 0;
-        for (int col = 0; col < image.getWidth(); col++) {
-            if (col == pathOfMinSeam.getFirst()) {
-                continue; // Skip the minimum vertical seam energy
+        BufferedImage newImage = new BufferedImage(width - 1, height, image.getType());
+
+        for (int row = 0; row < height; row++) {
+            int seamCol = seam[row];
+            int newCol = 0;
+
+            for (int col = 0; col < width; col++) {
+                if (col == seamCol) continue; // Skip the seam pixel
+
+                Color color = new Color(image.getRGB(col, row));
+                newImage.setRGB(newCol, row, color.getRGB());
+                newCol++;
             }
-            newImage.setRGB(colNewImage, row, image.getRGB(col, row)); // pixels copying
-            colNewImage++;
         }
-        pathOfMinSeam.removeFirst(); // Remove the first element of the seam path after processing a row
+
+        return newImage;
     }
 
-    return newImage;
-}
-
-    
     public static String SelectedImage() { // a method to make a user chooose the image they want to resize
         Scanner input = new Scanner(System.in);
         System.out.print(

@@ -1,113 +1,106 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.LinkedList;
-
 import javax.imageio.ImageIO;
+
+//import javafx.scene.paint.Color;
+import java.awt.Color;
+
 
 public class DynamicProgramming {
 
-    static private int[][] energy;
-    static private int[][] dp;
-    static private LinkedList<Integer> minPath;
-
-
-    public static void main (String []args)throws Exception{
-        BufferedImage newImage ;
-        String name= SeamCarving2.SelectedImage();
-        BufferedImage image= ImageIO.read(new File("images\\"+name+".jpg"));
-        newImage= resizeImage(image,95);        
-        ImageIO.write(newImage, "jpg", new File("resized Image.jpg"));
+    public static void main(String[] args) throws Exception {
+        String name = SeamCarving2.SelectedImage();
+        BufferedImage image = ImageIO.read(new File("images\\" + name + ".jpg"));
+        BufferedImage resizedImage = resizeImage(image, 95);
+        ImageIO.write(resizedImage, "jpg", new File("resized Image.jpg"));
         SeamCarving2.display(name);
     }
 
-    private static void calculate_dp(BufferedImage image) {
 
-        energy = SeamCarving2.calculatepixelsEnergy(image);
-        dp = new int[image.getHeight()][image.getWidth()];
-
-        // copying the last row
-        for (int i = 0; i < image.getWidth(); i++)
-            dp[image.getHeight() - 1][i] = energy[image.getHeight() - 1][i];
-
-        for (int row = image.getHeight() - 2; row >= 0; row--) {
-            for (int col = 0; col < image.getWidth(); col++) {
-                int left, mid, right;
-
-                if (col == 0)
-                    left = Integer.MAX_VALUE;
-                else
-                    left = dp[row + 1][col - 1];
-
-                if (col == image.getWidth() - 1)
-                    right = Integer.MAX_VALUE;
-                else
-                    right = dp[row + 1][col + 1];
-
-                mid = dp[row + 1][col];
-
-                dp[row][col] = energy[row][col] + Math.min(Math.min(left, right), mid);
-
-            }
-
+    public static BufferedImage resizeImage(BufferedImage image, int numOfSeams) {
+        for (int i = 0; i < numOfSeams; i++) {
+            int [][] energy=SeamCarving2.calculatepixelsEnergy(image);
+            image = SeamCarving2.removeSeam(image, findSeam(energy));
         }
-
-    }
-
-    private static void findMinSeamPath() {
-        minPath = new LinkedList<>(); // Initialize minPath for each seam path calculation
-
-        int min = dp[0][0];
-        int minCol = 0;
-
-        // Find the column with the minimal energy in the first row
-        for (int i = 1; i < dp[0].length; i++) {
-            if (dp[0][i] < min) {
-                minCol = i;
-                min = dp[0][i];
-            }
-        }
-
-        minPath.add(minCol); // Add the starting column to the path
-        for (int row = 1; row < dp.length; row++) {
-            int mid = dp[row][minCol];
-
-            int left = (minCol > 0) ? dp[row][minCol - 1] : Integer.MAX_VALUE;
-            int right = (minCol < dp[0].length - 1) ? dp[row][minCol + 1] : Integer.MAX_VALUE;
-
-            if (left < mid && left <= right) {
-                min = left;
-                minCol--;
-            } else if (right < mid && right < left) {
-                min = right;
-                minCol++;
-            } else {
-                min = mid;
-            }
-
-            minPath.add(minCol); // Add the current column to the path
-        }
-      // Ensure minPath has been populated
-        if (minPath.isEmpty()) {
-            System.out.println("Error: minPath is empty.");
-        }
-    }
-
-    public static BufferedImage resizeImage(BufferedImage image, int numOfSeam) {
-
-        for (int i = 0; i < numOfSeam; i++) {
-            calculate_dp(image);
-            findMinSeamPath();
-
-            // Ensure minPath is populated
-            if (minPath.isEmpty()) {
-                System.out.println("Error: minPath is empty before removing the seam.");
-                break; // Exit if minPath is empty
-            }
-
-            image = SeamCarving2.removeSeam(image, minPath);
-        }
-
         return image;
     }
 
+
+    public static int[] findSeam(int[][] energy) {
+        int height = energy.length;
+        int width = energy[0].length;
+        double[][] dp = new double[height][width];
+        int[][] path = new int[height][width];
+        double mine;
+        int minc;
+
+        // Copy first row
+        for (int col = 0; col < width; col++) {
+            dp[0][col] = energy[0][col];
+        }
+
+        // Fill pd
+        for (int row = 1; row<height; row++) {
+            for (int col = 0; col < width; col++) {
+                double left = (col > 0) ? dp[row - 1][col - 1] : Integer.MAX_VALUE;
+                double down = dp[row - 1][col];
+                double right = (col < width - 1) ? dp[row - 1][col + 1] : Integer.MAX_VALUE;
+
+                mine=down; minc=col; 
+                if(left<mine){
+                    mine=left;
+                    minc=col-1;
+                }
+                if(right<mine){
+                    mine=right;
+                    minc=col+1;
+                }
+                dp[row][col] = energy[row][col] + mine;
+                path[row][col]=minc;
+            }
+        }
+
+        int minIndex = 0;
+        for (int x = 1; x < width; x++) {
+            if (dp[height - 1][x] < dp[height - 1][minIndex]) {
+                minIndex = x;
+            }
+        }
+
+        int[] seam =new int[height];
+        seam[height-1]=minIndex;
+
+        for (int y = height - 2; y >= 0; y--) {
+            seam[y] = path[y +1][seam[y +1]];
+        }
+
+        return seam;
+    }
+ 
+
+    static public int[][] computeEnergy(BufferedImage image) {
+            int width = image.getWidth();
+            int height = image.getHeight();
+            int[][] energy = new int[height][width];
+    
+            for (int y = 1; y < height - 1; y++) {
+                for (int x = 1; x < width - 1; x++) {
+                    Color left = new Color(image.getRGB(x - 1, y));
+                    Color right = new Color(image.getRGB(x + 1, y));
+                    Color up = new Color(image.getRGB(x, y - 1));
+                    Color down = new Color(image.getRGB(x, y + 1));
+    
+                    double dx = Math.pow(right.getRed() - left.getRed(), 2)
+                              + Math.pow(right.getGreen() - left.getGreen(), 2)
+                              + Math.pow(right.getBlue() - left.getBlue(), 2);
+    
+                    double dy = Math.pow(down.getRed() - up.getRed(), 2)
+                              + Math.pow(down.getGreen() - up.getGreen(), 2)
+                              + Math.pow(down.getBlue() - up.getBlue(), 2);
+    
+                    energy[y][x] = (int)Math.sqrt(dx + dy);
+                }
+            }
+            return energy;
+        }
 }

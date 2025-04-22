@@ -30,7 +30,7 @@ public class Greedy {
 
     // Calculates the energy of each pixel in the image.
     // The energy is determined based on brightness differences with neighboring pixels.
-    private static int[][] computeEnergy(BufferedImage image) {
+    public static int[][] computeEnergy(BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
         int[][] energy = new int[height][width];
